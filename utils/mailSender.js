@@ -38,14 +38,17 @@ const nodemailer = require("nodemailer");
 const mailSender = async (email, title, body) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: 587,
-      secure: false,
+      host: process.env.MAIL_HOST,        // smtp.gmail.com
+      port: Number(process.env.MAIL_PORT) || 587,
+      secure: false,                      // TLS
       auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
       },
     });
+
+    // ✅ Verify transporter connection (DEBUGGING PURPOSE)
+    await transporter.verify();
 
     const info = await transporter.sendMail({
       from: `"StudyNotion" <${process.env.MAIL_USER}>`,
@@ -54,12 +57,13 @@ const mailSender = async (email, title, body) => {
       html: body,
     });
 
-    console.log("Mail sent:", info.messageId);
+    console.log("Mail sent successfully:", info.messageId);
     return info;
   } catch (error) {
-    console.log("Mail sender error:", error.message);
-    throw error; // 🔥 VERY IMPORTANT
+    console.error("❌ Mail sender error:", error);
+    throw error; // 🔥 MUST throw
   }
 };
 
 module.exports = mailSender;
+
